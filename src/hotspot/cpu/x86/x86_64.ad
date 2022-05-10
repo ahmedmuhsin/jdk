@@ -2488,8 +2488,7 @@ encode %{
       dstenc -= 8;
     }
     // NEG $dst
-    emit_opcode(cbuf, 0xF7);
-    emit_rm(cbuf, 0x3, 0x03, dstenc);
+    __ negl($dst)
   %}
 
   enc_class neg_reg_wide(rRegI dst)
@@ -2502,8 +2501,7 @@ encode %{
       dstenc -= 8;
     }
     // NEG $dst
-    emit_opcode(cbuf, 0xF7);
-    emit_rm(cbuf, 0x3, 0x03, dstenc);
+    __ negl($dst)
   %}
 
   enc_class setLT_reg(rRegI dst)
