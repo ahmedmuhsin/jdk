@@ -2514,9 +2514,7 @@ encode %{
       emit_opcode(cbuf, Assembler::REX);
     }
     // SETLT $dst
-    emit_opcode(cbuf, 0x0F);
-    emit_opcode(cbuf, 0x9C);
-    emit_rm(cbuf, 0x3, 0x0, dstenc);
+    __ setl($dst$$Register)
   %}
 
   enc_class setNZ_reg(rRegI dst)
