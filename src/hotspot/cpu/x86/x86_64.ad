@@ -2527,9 +2527,7 @@ encode %{
       emit_opcode(cbuf, Assembler::REX);
     }
     // SETNZ $dst
-    emit_opcode(cbuf, 0x0F);
-    emit_opcode(cbuf, 0x95);
-    emit_rm(cbuf, 0x3, 0x0, dstenc);
+    __ set_byte_if_not_zero($dst$$Register)
   %}
 
 
