@@ -5017,6 +5017,7 @@ instruct loadS2B(rRegI dst, memory mem, immI_24 twentyfour) %{
 // Load Short (16 bit signed) into Long Register
 instruct loadS2L(rRegL dst, memory mem)
 %{
+  printf("\n!!!!!!!!!!!!!!!!!!!!!!!!!!! CALLED loadS2L !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"); 
   match(Set dst (ConvI2L (LoadS mem)));
 
   ins_cost(125);
