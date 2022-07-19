@@ -6037,8 +6037,9 @@ instruct loadSSI(rRegI dst, stackSlotI src)
 
   ins_cost(125);
   format %{ "movl    $dst, $src\t# int stk" %}
-  opcode(0x8B);
-  ins_encode(REX_reg_mem(dst, src), OpcP, reg_mem(dst, src));
+  ins_encode %{
+    __ movl($dst$$Register, $src$$Register);
+  %}
   ins_pipe(ialu_reg_mem);
 %}
 
@@ -6048,8 +6049,9 @@ instruct loadSSL(rRegL dst, stackSlotL src)
 
   ins_cost(125);
   format %{ "movq    $dst, $src\t# long stk" %}
-  opcode(0x8B);
-  ins_encode(REX_reg_mem_wide(dst, src), OpcP, reg_mem(dst, src));
+  ins_encode %{
+    __ movq($dst$$Register, $src$$Register);
+  %}
   ins_pipe(ialu_reg_mem);
 %}
 
@@ -6059,8 +6061,9 @@ instruct loadSSP(rRegP dst, stackSlotP src)
 
   ins_cost(125);
   format %{ "movq    $dst, $src\t# ptr stk" %}
-  opcode(0x8B);
-  ins_encode(REX_reg_mem_wide(dst, src), OpcP, reg_mem(dst, src));
+  ins_encode %{
+    __ movq($dst$$Register, $src$$Register);
+  %}
   ins_pipe(ialu_reg_mem);
 %}
 
@@ -6516,8 +6519,9 @@ instruct storeSSI(stackSlotI dst, rRegI src)
 
   ins_cost(100);
   format %{ "movl    $dst, $src\t# int stk" %}
-  opcode(0x89);
-  ins_encode(REX_reg_mem(src, dst), OpcP, reg_mem(src, dst));
+  ins_encode %{
+    __ movl($dst$$Register, $src$$Register);
+  %}
   ins_pipe( ialu_mem_reg );
 %}
 
@@ -6527,8 +6531,9 @@ instruct storeSSL(stackSlotL dst, rRegL src)
 
   ins_cost(100);
   format %{ "movq    $dst, $src\t# long stk" %}
-  opcode(0x89);
-  ins_encode(REX_reg_mem_wide(src, dst), OpcP, reg_mem(src, dst));
+  ins_encode %{
+    __ movq($dst$$Register, $src$$Register);
+  %}
   ins_pipe(ialu_mem_reg);
 %}
 
@@ -6538,8 +6543,9 @@ instruct storeSSP(stackSlotP dst, rRegP src)
 
   ins_cost(100);
   format %{ "movq    $dst, $src\t# ptr stk" %}
-  opcode(0x89);
-  ins_encode(REX_reg_mem_wide(src, dst), OpcP, reg_mem(src, dst));
+  ins_encode %{
+    __ movq($dst$$Register, $src$$Register);
+  %}
   ins_pipe(ialu_mem_reg);
 %}
 
@@ -6908,7 +6914,7 @@ instruct membar_acquire()
 
   size(0);
   format %{ "MEMBAR-acquire ! (empty encoding)" %}
-  ins_encode();
+  ins_encode %{%}
   ins_pipe(empty);
 %}
 
@@ -6919,7 +6925,7 @@ instruct membar_acquire_lock()
 
   size(0);
   format %{ "MEMBAR-acquire (prior CMPXCHG in FastLock so empty encoding)" %}
-  ins_encode();
+  ins_encode %{%}
   ins_pipe(empty);
 %}
 
@@ -6931,7 +6937,7 @@ instruct membar_release()
 
   size(0);
   format %{ "MEMBAR-release ! (empty encoding)" %}
-  ins_encode();
+  ins_encode %{%}
   ins_pipe(empty);
 %}
 
@@ -6942,7 +6948,7 @@ instruct membar_release_lock()
 
   size(0);
   format %{ "MEMBAR-release (a FastUnlock follows so empty encoding)" %}
-  ins_encode();
+  ins_encode %{%}
   ins_pipe(empty);
 %}
 
@@ -6969,7 +6975,7 @@ instruct unnecessary_membar_volatile()
 
   size(0);
   format %{ "MEMBAR-volatile (unnecessary so empty encoding)" %}
-  ins_encode();
+  ins_encode %{%}
   ins_pipe(empty);
 %}
 
@@ -6980,7 +6986,7 @@ instruct membar_storestore() %{
 
   size(0);
   format %{ "MEMBAR-storestore (empty encoding)" %}
-  ins_encode( );
+  ins_encode %{%}
   ins_pipe(empty);
 %}
 
@@ -8088,7 +8094,7 @@ instruct checkCastPP(rRegP dst)
 
   size(0);
   format %{ "# checkcastPP of $dst" %}
-  ins_encode(/* empty encoding */);
+  ins_encode %{ /* empty encoding */ %}
   ins_pipe(empty);
 %}
 
@@ -8098,7 +8104,7 @@ instruct castPP(rRegP dst)
 
   size(0);
   format %{ "# castPP of $dst" %}
-  ins_encode(/* empty encoding */);
+  ins_encode %{ /* empty encoding */ %}
   ins_pipe(empty);
 %}
 
@@ -8108,7 +8114,7 @@ instruct castII(rRegI dst)
 
   size(0);
   format %{ "# castII of $dst" %}
-  ins_encode(/* empty encoding */);
+  ins_encode %{ /* empty encoding */ %}
   ins_cost(0);
   ins_pipe(empty);
 %}
@@ -8119,7 +8125,7 @@ instruct castLL(rRegL dst)
 
   size(0);
   format %{ "# castLL of $dst" %}
-  ins_encode(/* empty encoding */);
+  ins_encode %{ /* empty encoding */ %}
   ins_cost(0);
   ins_pipe(empty);
 %}
@@ -8130,7 +8136,7 @@ instruct castFF(regF dst)
 
   size(0);
   format %{ "# castFF of $dst" %}
-  ins_encode(/* empty encoding */);
+  ins_encode %{ /* empty encoding */ %}
   ins_cost(0);
   ins_pipe(empty);
 %}
@@ -8141,7 +8147,7 @@ instruct castDD(regD dst)
 
   size(0);
   format %{ "# castDD of $dst" %}
-  ins_encode(/* empty encoding */);
+  ins_encode %{ /* empty encoding */ %}
   ins_cost(0);
   ins_pipe(empty);
 %}
@@ -8187,11 +8193,10 @@ instruct storeIConditional(memory mem, rax_RegI oldval, rRegI newval, rFlagsReg 
   effect(KILL oldval);
 
   format %{ "cmpxchgl $mem, $newval\t# If rax == $mem then store $newval into $mem" %}
-  opcode(0x0F, 0xB1);
-  ins_encode(lock_prefix,
-             REX_reg_mem(newval, mem),
-             OpcP, OpcS,
-             reg_mem(newval, mem));
+  ins_encode %{
+    __ lock();
+    __ cmpxchgl($newval$$Register, $mem$$Address);
+  %}
   ins_pipe(pipe_cmpxchg);
 %}
 
@@ -8778,8 +8783,9 @@ instruct subP_rReg(rRegP dst, rRegI src, immI_0 zero, rFlagsReg cr)
   effect(KILL cr);
 
   format %{ "subq    $dst, $src\t# ptr - int" %}
-  opcode(0x2B);
-  ins_encode(REX_reg_reg_wide(dst, src), OpcP, reg_reg(dst, src));
+  ins_encode %{
+    __ subq($dst$$Address, $src$$constant);
+  %}
   ins_pipe(ialu_reg_reg);
 %}
 
@@ -9149,7 +9155,9 @@ instruct loadConL_0x6666666666666667(rRegL dst)
   effect(DEF dst);
 
   format %{ "movq    $dst, #0x666666666666667\t# Used in div-by-10" %}
-  ins_encode(load_immL(dst, 0x6666666666666667));
+  ins_encode %{
+    __ movq($dst$$Register, 0x6666666666666667$$constant);
+  %}
   ins_pipe(ialu_reg);
 %}
 
@@ -13928,7 +13936,7 @@ instruct CreateException(rax_RegP ex_oop)
   size(0);
   // use the following format syntax
   format %{ "# exception oop is in rax; no code emitted" %}
-  ins_encode();
+  ins_encode %{%}
   ins_pipe(empty);
 %}
 
@@ -13955,7 +13963,7 @@ instruct tlsLoadP(r15_RegP dst) %{
 
   size(0);
   format %{ "# TLS is in R15" %}
-  ins_encode( /*empty encoding*/ );
+  ins_encode %{ /*empty encoding*/ %}
   ins_pipe(ialu_reg_reg);
 %}
 
