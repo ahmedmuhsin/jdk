@@ -370,6 +370,46 @@ RegMask _STACK_OR_PTR_REG_mask;
 RegMask _STACK_OR_LONG_REG_mask;
 RegMask _STACK_OR_INT_REG_mask;
 
+#define TEST_BEG                                                   \
+    address mark = cbuf.insts_mark();                              \
+    int length = cbuf.insts_end() - mark;                          \
+    unsigned char* v1 = (unsigned char*) malloc(length);           \
+    unsigned char* v2 = (unsigned char*) malloc(length);           \
+    memcpy(v1, (const char*)mark, length);                         \
+    cbuf.set_insts_end(cbuf.insts_mark());                         \
+    MacroAssembler _masm(&cbuf);
+
+#define TEST_END                                                  \
+    memcpy(v2, (const char*)mark, length);                        \
+    int crc1 = ClassLoader::crc32(0, (const char *) v1, length);  \
+    int crc2 = ClassLoader::crc32(0, (const char *) v2, length);  \
+    if (crc1 != crc2) {                                           \
+      fprintf(stderr, "%s:%s:%d\n", __FILE__, __FUNCTION__, __LINE__);  \
+      printf("%06d : original: ", __LINE__);                      \
+      for (int i=0; i<length; i++) {                              \
+        printf("%02x ", v1[i]);                                   \
+      }                                                           \
+      printf("\n");                                               \
+      printf("%06d : new:      ", __LINE__);                      \
+      for (int i=0; i<length; i++) {                              \
+        printf("%02x ", v2[i]);                                   \
+      }                                                           \
+      printf("\n");                                               \
+      printf("% 6d :           ", 0);                             \
+      for (int i=0; i<length; i++) {                              \
+        if (v1[i] != v2[i]) {                                     \
+          printf("^^ ");                                          \
+        }                                                         \
+        else {                                                    \
+          printf("   ");                                          \
+        }                                                         \
+      }                                                           \
+      printf("\n");                                               \
+      assert(false, "oops!");                                     \
+    }                                                             \
+    free(v1);                                                     \
+    free(v2);
+
 static bool need_r12_heapbase() {
   return UseCompressedOops;
 }
@@ -2715,6 +2755,88 @@ encode %{
                    RELOC_DISP32);
   %}
 
+  enc_class test_loadSSI(rRegI dst, stackSlotI src)
+  %{
+    TEST_BEG
+
+      __ movl($dst$$Register, $src$$Register)
+
+    TEST_END
+  %}
+
+  enc_class test_loadSSL(rRegL dst, stackSlotL src)
+  %{
+    TEST_BEG
+
+      __ movq($dst$$Register, $src$$Register)
+      
+    TEST_END
+  %}
+
+  enc_class test_loadSSP(rRegP dst, stackSlotP src)
+  %{
+    TEST_BEG
+
+      __ movq($dst$$Register, $src$$Register)
+      
+    TEST_END
+  %}
+
+  enc_class test_storeSSI(stackSlotI dst, rRegI src)
+  %{
+    TEST_BEG
+
+      __ movl($dst$$Register, $src$$Register)
+
+    TEST_END
+  %}
+
+  enc_class test_storeSSL(stackSlotL dst, rRegL src)
+  %{
+    TEST_BEG
+
+      __ movq($dst$$Register, $src$$Register)
+
+    TEST_END
+  %}
+
+  enc_class test_storeSSP(stackSlotP dst, rRegP src)
+  %{
+    TEST_BEG
+
+      __ movq($dst$$Register, $src$$Register)
+
+    TEST_END
+  %}
+
+
+  enc_class test_storeIConditional(memory mem, rRegI newval)
+  %{
+    TEST_BEG
+
+      __ lock();
+      __ cmpxchgl($newval$$Register, $mem$$Address);
+
+    TEST_END
+  %}
+
+  enc_class test_subP_rReg(rRegP dst, rRegIsrc)
+  %{
+    TEST_BEG
+
+      __ subq($dst$$Address, $src$$constant);
+
+    TEST_END
+  %}
+
+  enc_class test_loadConL_0x6666666666666667(rRegL dst)
+  %{
+    TEST_BEG
+    
+      __ movq($dst$$Register, 0x6666666666666667$$constant);
+
+    TEST_END
+  %}
 %}
 
 
